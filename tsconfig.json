@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "isolatedModules": false,
+    "noResolve": false,
+    "target": "ES3",
+    "module": "es2015",
+    "strict": true,
+    "experimentalDecorators": true,
+    "noEmit": true
+  },
+  "include": ["src/**/*"]
+}

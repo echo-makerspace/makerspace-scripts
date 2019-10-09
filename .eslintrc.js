@@ -1,3 +1,4 @@
 module.exports = {
-  extends: ["@sondr3/javascript"]
+  parserOptions: { project: "./tsconfig.json" },
+  extends: ["@sondr3/typescript"]
 };
