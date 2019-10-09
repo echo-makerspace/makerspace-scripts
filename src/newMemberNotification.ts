@@ -1,131 +1,126 @@
-// ///////////////////////
-// Begin customization //
-// ///////////////////////
+const slackWebhook = PropertiesService.getScriptProperties().getProperty("TEST_WEBHOOK");
+const channel = PropertiesService.getScriptProperties().getProperty("TEST_CHANNEL");
 
-// Alter this to match the incoming webhook url provided by Slack
-const slackIncomingWebhookUrl = "";
+interface Answers {
+  timestamp: Date;
+  name: String;
+  email: String;
+  graduationDate: Date;
+  why: String;
+}
 
-// Include # for public channels, omit it for private channels
-const postChannel = "#makerspace-testing";
+interface Response {
+  authMode: Object;
+  values: String[];
+  namedValues: [Object];
+  range: Object;
+  source: Object;
+  triggerUid: number;
+}
 
-const postIcon = ":star:";
-const postColor = "#0000DD";
-
-const messageFallback = "Nytt medlem!";
-
-// /////////////////////
-// End customization //
-// /////////////////////
-
-// In the Script Editor, run initialize() at least once to make your code execute on form submit
+// To activate the script, run `initialize` once in the Script Editor.
 function initialize() {
   const triggers = ScriptApp.getProjectTriggers();
-  for (const i in triggers) {
-    ScriptApp.deleteTrigger(triggers[i]);
-  }
-  ScriptApp.newTrigger("submitValuesToSlack")
+  triggers.forEach(trigger => {
+    ScriptApp.deleteTrigger(trigger);
+  });
+
+  ScriptApp.newTrigger("sendToSlack")
     .forSpreadsheet(SpreadsheetApp.getActiveSpreadsheet())
     .onFormSubmit()
     .create();
 }
 
-// Running the code in initialize() will cause this function to be triggered this on every Form Submit
-function submitValuesToSlack(e) {
-  // Test code. uncomment to debug in Google Script editor
-  // if (typeof e === "undefined") {
-  //   e = {namedValues: {"Question1": ["answer1"], "Question2" : ["answer2"]}};
-  //   messagePretext = "Debugging our Sheets to Slack integration";
-  // }
+// Get headers that applicant fills in using Google Forms.
+function getHeaders() {
+  const sheet = SpreadsheetApp.getActiveSheet();
+  const headers = sheet.getRange(1, 1, 1, 5);
+  const names = headers.getValues()[0];
 
-  const aliasAndAttachments = constructAliasAndAttachments(e.values);
-  const alias = aliasAndAttachments[0];
-  const attachments = aliasAndAttachments[1];
+  return names;
+}
 
-  const payload = {
-    channel: postChannel,
-    username: alias,
-    icon_emoji: postIcon,
-    link_names: 1,
-    attachments
-  };
+// Create the blocks used in the message sent to Slack, see their API for more documentation.
+function constructMessage(answers: Answers) {
+  const blocks = [
+    {
+      type: "section",
+      block_id: "newMember",
+      text: {
+        type: "mrkdwn",
+        text: `<!channel> Vi har et nytt medlem! :partyparrot:\n*${answers.name}*`
+      }
+    },
+    {
+      type: "section",
+      block_id: "about",
+      fields: [
+        {
+          type: "mrkdwn",
+          text: `*Dato*\n<!date^${Math.floor(
+            answers.timestamp.valueOf() / 1000
+          )}^{time}, {date}|${answers.timestamp.toISOString()}>`
+        },
+        {
+          type: "mrkdwn",
+          text: "*E-post*\n" + answers.email
+        }
+      ]
+    },
+    {
+      type: "section",
+      block_id: "why",
+      fields: [
+        {
+          type: "mrkdwn",
+          text: "*Hvorfor vil du være med?:*\n" + answers.why
+        }
+      ]
+    }
+  ];
 
+  return blocks;
+}
+
+// Send message to our Slack instance.
+function sendToSlack(response: Response) {
+  if (slackWebhook === null) {
+    return;
+  }
+
+  const answers = convertToAnswers(response);
+  const message = constructMessage(answers);
+  const payload = { blocks: message };
   const options = {
     method: "post",
     payload: JSON.stringify(payload)
   };
 
-  const response = UrlFetchApp.fetch(slackIncomingWebhookUrl, options);
+  UrlFetchApp.fetch(slackWebhook, options);
 }
 
-// Creates an array containing the submitter's alias and Slack message attachments which
-// contain the data from the Google Form submission, which is passed in as a parameter
-// https://api.slack.com/docs/message-attachments
-var constructAliasAndAttachments = function(values) {
-  const aliasAndTsAndFields = makeAliasAndTsAndFields(values);
-  const alias = aliasAndTsAndFields[0];
-  const timestamp = aliasAndTsAndFields[1];
-  const fields = aliasAndTsAndFields[2];
+// Get the answers from the applicant to the form.
+function convertToAnswers(response: Response): Answers {
+  const answers: Answers = {
+    timestamp: convertToDate(response.values[0]),
+    email: response.values[1],
+    name: response.values[2],
+    why: response.values[3],
+    graduationDate: convertToDate(response.values[4])
+  };
 
-  const messagePretext = "".concat("*[Slackup]*\n", "On ", timestamp, ", *", alias, "* says");
+  return answers;
+}
 
-  const attachments = [
-    {
-      fallback: messageFallback,
-      pretext: messagePretext,
-      mrkdwn_in: ["pretext"],
-      color: postColor,
-      fields
-    }
-  ];
+// Because fuck date parsing.
+function convertToDate(input: String): Date {
+  const [d1, d2] = input.split(" ");
+  const [day, month, year] = d1.split("/");
 
-  return [alias, attachments];
-};
-
-// Creates an array containing submitter's alias, submission timestamp, and an
-// array of Slack fields containing the questions and answers
-var makeAliasAndTsAndFields = function(values) {
-  const fields = [];
-  let alias = "";
-  let timestamp = "";
-
-  const columnNames = getColumnNames();
-
-  for (let i = 0; i < columnNames.length; i++) {
-    const colName = columnNames[i];
-    const val = values[i];
-
-    if (colName == "Timestamp") {
-      timestamp = val;
-    } else if (colName == "Navn") {
-      alias = val;
-    } else {
-      fields.push(makeField(colName, val));
-    }
+  if (!d2) {
+    return new Date(parseInt(year), parseInt(month), parseInt(day));
   }
 
-  return [alias, timestamp, fields];
-};
-
-// Creates a Slack field for your message
-// https://api.slack.com/docs/message-attachments#fields
-var makeField = function(question, answer) {
-  const field = {
-    title: question,
-    value: answer,
-    short: false
-  };
-  return field;
-};
-
-// Extracts the column names from the first row of the spreadsheet
-var getColumnNames = function() {
-  const sheet = SpreadsheetApp.getActiveSheet();
-
-  // Get the header row using A1 notation
-  const headerRow = sheet.getRange("1:1");
-
-  // Extract the values from it
-  const headerRowValues = headerRow.getValues()[0];
-
-  return headerRowValues;
-};
+  const [hour, minute, second] = d2.split(":");
+  return new Date(parseInt(year), parseInt(month), parseInt(day), parseInt(hour), parseInt(minute), parseInt(second));
+}
