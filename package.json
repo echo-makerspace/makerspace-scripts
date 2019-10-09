@@ -1,0 +1,15 @@
+{
+  "name": "makerspace-scripts",
+  "version": "0.1.0",
+  "main": "index.js",
+  "repository": "git@github.com:echo-uib/makerspace-scripts.git",
+  "author": "Sondre Nilsen <nilsen.sondre@gmail.com>",
+  "license": "MIT",
+  "prettier": "@sondr3/prettier",
+  "devDependencies": {
+    "@sondr3/eslint-config-javascript": "^0.2.3",
+    "@sondr3/prettier": "^0.1.1",
+    "eslint": "^6.5.1",
+    "prettier": "^1.18.2"
+  }
+}
