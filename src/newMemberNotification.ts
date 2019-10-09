@@ -1,5 +1,5 @@
-const slackWebhook = PropertiesService.getScriptProperties().getProperty("TEST_WEBHOOK");
-const channel = PropertiesService.getScriptProperties().getProperty("TEST_CHANNEL");
+const slackWebhook = PropertiesService.getScriptProperties().getProperty("PROD_WEBHOOK");
+const channel = PropertiesService.getScriptProperties().getProperty("PROD_CHANNEL");
 
 interface Answers {
   timestamp: Date;
