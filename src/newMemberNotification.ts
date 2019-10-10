@@ -42,6 +42,9 @@ function getHeaders() {
 
 // Create the blocks used in the message sent to Slack, see their API for more documentation.
 function constructMessage(answers: Answers) {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet();
+  const url = sheet.getUrl();
+
   const blocks = [
     {
       type: "section",
@@ -76,6 +79,21 @@ function constructMessage(answers: Answers) {
           text: "*Hvorfor vil du være med?:*\n" + answers.why
         }
       ]
+    },
+    {
+      type: "actions",
+      block_id: "actions",
+      elements: [
+        {
+          type: "button",
+          style: "primary",
+          text: {
+            type: "plain_text",
+            text: "Gå til skjema"
+          },
+          url: url
+        }
+      ]
     }
   ];
 
@@ -96,7 +114,8 @@ function sendToSlack(response: Response) {
     payload: JSON.stringify(payload)
   };
 
-  UrlFetchApp.fetch(slackWebhook, options);
+  let resp = UrlFetchApp.fetch(slackWebhook, options);
+  Logger.log(resp);
 }
 
 // Get the answers from the applicant to the form.
