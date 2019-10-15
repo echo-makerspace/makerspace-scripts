@@ -106,7 +106,7 @@ function sendToSlack(response: Response) {
 
   const answers = convertToAnswers(response);
   const message = constructMessage(answers);
-  const payload = { text: "Vi har fått et nytt medlem!", blocks: message };
+  const payload = { text: "Medlem søker 3D-printer kurs!", blocks: message };
   const options = {
     method: "post",
     payload: JSON.stringify(payload)
