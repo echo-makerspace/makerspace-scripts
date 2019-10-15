@@ -1,0 +1,8 @@
+{
+  "name": "new-member-scripts",
+  "version": "0.1.0",
+  "scripts": {
+    "clasp": "clasp",
+    "develop": "tsc --watch"
+  }
+}

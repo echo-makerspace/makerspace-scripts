@@ -1,15 +1,13 @@
 {
   "name": "makerspace-scripts",
-  "version": "0.1.0",
-  "main": "index.js",
   "repository": "git@github.com:echo-uib/makerspace-scripts.git",
   "author": "Sondre Nilsen <nilsen.sondre@gmail.com>",
   "license": "MIT",
+  "private": true,
+  "workspaces": [
+    "packages/**"
+  ],
   "prettier": "@sondr3/prettier",
-  "scripts": {
-    "clasp": "clasp",
-    "develop": "tsc --watch"
-  },
   "devDependencies": {
     "@google/clasp": "^2.3.0",
     "@sondr3/eslint-config-typescript": "^0.3.1",
