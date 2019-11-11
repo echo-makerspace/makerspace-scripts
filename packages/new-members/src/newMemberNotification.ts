@@ -62,7 +62,7 @@ function constructMessage(answers: Answers) {
           type: "mrkdwn",
           text: `*Dato*\n<!date^${Math.floor(
             answers.timestamp.valueOf() / 1000
-          )}^{time}, {date}|${answers.timestamp.toISOString()}>`
+          )}^{date}|${answers.timestamp.toISOString()}>`
         },
         {
           type: "mrkdwn",
