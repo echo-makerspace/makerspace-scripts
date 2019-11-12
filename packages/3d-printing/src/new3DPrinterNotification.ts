@@ -61,8 +61,8 @@ function constructMessage(answers: Answers) {
           type: "mrkdwn",
           text: `*Dato*\n<!date^${Math.floor(
             answers.timestamp.valueOf() / 1000
-          )}^{time}, {date}|${answers.timestamp.toISOString()}>`
-        },
+          )}^{date}|${answers.timestamp.toISOString()}>`
+        }
         {
           type: "mrkdwn",
           text: "*E-post*\n" + answers.email
@@ -129,13 +129,8 @@ function convertToAnswers(response: Response): Answers {
 
 // Because fuck date parsing.
 function convertToDate(input: String): Date {
-  const [d1, d2] = input.split(" ");
-  const [day, month, year] = d1.split("/");
+  const [date, ,] = input.split(" ");
+  const [day, month, year] = date.split(".");
 
-  if (!d2) {
-    return new Date(parseInt(year), parseInt(month), parseInt(day));
-  }
-
-  const [hour, minute, second] = d2.split(":");
-  return new Date(parseInt(year), parseInt(month), parseInt(day), parseInt(hour), parseInt(minute), parseInt(second));
+  return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
 }
