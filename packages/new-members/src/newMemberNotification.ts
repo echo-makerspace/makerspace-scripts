@@ -136,5 +136,5 @@ function convertToDate(input: String): Date {
   const [date, ,] = input.split(" ");
   const [day, month, year] = date.split(".");
 
-  return new Date(parseInt(year), parseInt(month), parseInt(day));
+  return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
 }
