@@ -21,14 +21,11 @@ interface Response {
 // To activate the script, run `initialize` once in the Script Editor.
 function initialize() {
   const triggers = ScriptApp.getProjectTriggers();
-  triggers.forEach(trigger => {
+  triggers.forEach((trigger) => {
     ScriptApp.deleteTrigger(trigger);
   });
 
-  ScriptApp.newTrigger("sendToSlack")
-    .forSpreadsheet(SpreadsheetApp.getActiveSpreadsheet())
-    .onFormSubmit()
-    .create();
+  ScriptApp.newTrigger("sendToSlack").forSpreadsheet(SpreadsheetApp.getActiveSpreadsheet()).onFormSubmit().create();
 }
 
 // Get headers that applicant fills in using Google Forms.
@@ -51,8 +48,8 @@ function constructMessage(answers: Answers) {
       block_id: "newMember",
       text: {
         type: "mrkdwn",
-        text: `<!channel> Vi har et nytt medlem! :partyparrot:\n*${answers.name}*`
-      }
+        text: `<!channel> Vi har et nytt medlem! :partyparrot:\n*${answers.name}*`,
+      },
     },
     {
       type: "section",
@@ -61,14 +58,14 @@ function constructMessage(answers: Answers) {
         {
           type: "mrkdwn",
           text: `*Dato*\n<!date^${Math.floor(
-            answers.timestamp.valueOf() / 1000
-          )}^{date}|${answers.timestamp.toISOString()}>`
+            answers.timestamp.valueOf() / 1000,
+          )}^{date}|${answers.timestamp.toISOString()}>`,
         },
         {
           type: "mrkdwn",
-          text: "*E-post*\n" + answers.email
-        }
-      ]
+          text: "*E-post*\n" + answers.email,
+        },
+      ],
     },
     {
       type: "section",
@@ -76,9 +73,9 @@ function constructMessage(answers: Answers) {
       fields: [
         {
           type: "mrkdwn",
-          text: "*Hvorfor vil du være med?:*\n" + answers.why
-        }
-      ]
+          text: "*Hvorfor vil du være med?:*\n" + answers.why,
+        },
+      ],
     },
     {
       type: "actions",
@@ -89,12 +86,12 @@ function constructMessage(answers: Answers) {
           style: "primary",
           text: {
             type: "plain_text",
-            text: "Gå til skjema"
+            text: "Gå til skjema",
           },
-          url: url
-        }
-      ]
-    }
+          url: url,
+        },
+      ],
+    },
   ];
 
   return blocks;
@@ -111,7 +108,7 @@ function sendToSlack(response: Response) {
   const payload = { text: "Vi har fått et nytt medlem!", blocks: message };
   const options = {
     method: "post",
-    payload: JSON.stringify(payload)
+    payload: JSON.stringify(payload),
   };
 
   let resp = UrlFetchApp.fetch(slackWebhook, options);
@@ -125,7 +122,7 @@ function convertToAnswers(response: Response): Answers {
     email: response.values[1],
     name: response.values[2],
     why: response.values[3],
-    graduationDate: convertToDate(response.values[4])
+    graduationDate: convertToDate(response.values[4]),
   };
 
   return answers;
