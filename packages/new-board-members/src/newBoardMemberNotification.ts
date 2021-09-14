@@ -5,7 +5,6 @@ interface Answers {
   timestamp: Date;
   name: String;
   email: String;
-  graduationDate: Date;
   why: String;
 }
 
@@ -31,7 +30,7 @@ function initialize() {
 // Get headers that applicant fills in using Google Forms.
 function getHeaders() {
   const sheet = SpreadsheetApp.getActiveSheet();
-  const headers = sheet.getRange(1, 1, 1, 5);
+  const headers = sheet.getRange(1, 1, 1, 4);
   const names = headers.getValues()[0];
 
   return names;
@@ -48,7 +47,7 @@ function constructMessage(answers: Answers) {
       block_id: "newMember",
       text: {
         type: "mrkdwn",
-        text: `<!channel> Vi har et nytt medlem! :partyparrot:\n*${answers.name}*`,
+        text: `<!channel> Vi har en ny søker til styret! :partyparrot:\n*${answers.name}*`,
       },
     },
     {
@@ -105,7 +104,7 @@ function sendToSlack(response: Response) {
 
   const answers = convertToAnswers(response);
   const message = constructMessage(answers);
-  const payload = { text: "Vi har fått et nytt medlem!", blocks: message };
+  const payload = { text: "Vi har fått en ny søker til styret!", blocks: message };
   const options = {
     method: "post",
     payload: JSON.stringify(payload),
@@ -122,7 +121,6 @@ function convertToAnswers(response: Response): Answers {
     email: response.values[1],
     name: response.values[2],
     why: response.values[3],
-    graduationDate: convertToDate(response.values[4]),
   };
 
   return answers;
